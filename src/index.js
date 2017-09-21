@@ -1,15 +1,12 @@
-import './index.css';
+import './css/reset.css';
+import './css/sanitize.css';
+import './css/index.css';
 import * as $ from "jquery";
 import * as firebase from "firebase";
+import phpDatabase from "./PhpDataBase";
 
 $(() => {
-    const userNameKey = "gs08-05-username";
-    const defaultUserName = localStorage.getItem(userNameKey);
-    if(defaultUserName){
-        $("#username").val(defaultUserName);
-    }
-
-
+    let currentUser;
     // Initialize Firebase
     const config = {
         apiKey: "AIzaSyCMWVmBm8pRWEIxAtIgXVnomkLLZXqeAgw",
@@ -21,73 +18,130 @@ $(() => {
     };
     firebase.initializeApp(config);
 
-    
-
-    const newPostRef = firebase.database().ref();
-
-    $("#text").on("keydown", (e) => {
-        if (e.keyCode === 13) {
-            e.preventDefault();
-            const username = $("#username").val();
-
-            localStorage.setItem(userNameKey, username);
-
-            newPostRef.push({
-                username: username,
-                text: $("#text").val(),
-                time: (new Date()).getTime()
-            });
-            $("#text").val("");
-        }
-    });
-
-    newPostRef.on("child_added", (data) => {
-        const v = data.val();
-        // const k = data.key;
-        const name = $("#username").val();
-        let message = "";
-        let d = new Date();
-        let time = "";
-        if(v.time){
-            d.setTime(v.time);
-            time = ("0" + d.getHours()).substr(-2) + ":"  + ("0" + d.getMinutes()).substr(-2);
-        }
-        if (name === v.username) {
-            message = createRightMessage(v.username, v.text, time);
+    //ログインしているかしていないかで処理を分ける
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {//ログインしてたら
+            console.log(user);
+            currentUser = user;
+            $(".profile__photo").attr("src", currentUser.photoURL);
+            $(".profile__displayName").text(currentUser.displayName);
+            $(".login").hide();
+            $(".chat").show();
+            init();
         } else {
-            message = createLeftMessage(v.username, v.text, time);
+            $(".login").show();
+            $(".chat").hide();
         }
-
-        const $board = $("#board");
-
-        $board.append(message);
-        $board.scrollTop(999999999);
-
     });
 
-    const createLeftMessage = (username, message, time) => {
+    $(".profile__logout").on("click", (e) => {
+        e.preventDefault();
+        firebase.auth().signOut().then(() => {
+            console.log("Signed out.");
+        });
+    });
+
+    //facebookログインをする
+    $(".login__button-facebook").on("click", (e) => {
+        e.preventDefault();
+        const provider = new firebase.auth.FacebookAuthProvider();
+        provider.addScope('public_profile');
+        // provider.setCustomParameters({
+        //     'display': 'popup'
+        // });
+
+        firebase.auth().signInWithRedirect(provider).then((result) => {
+        }).catch(function(error) {
+            // Handle Errors here.
+            alert("ログインエラー");
+            console.error(error.code);
+            console.error(error.message);
+        });
+    });
+
+    $(".profile__photo").on("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        $(".profile__index").show();
+    });
+
+
+    $("html").on("click", (e) => {
+        e.preventDefault();
+        $(".profile__index").hide();
+    });
+
+
+
+
+    const init = () => {
+        const newPostRef = firebase.database().ref();
+        // const newPostRef = new phpDatabase();
+
+        $("#message").on("keydown", (e) => {
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                const $this = $(e.currentTarget);
+                newPostRef.push({
+                    uid: currentUser.uid,
+                    displayName: currentUser.displayName,
+                    photoURL: currentUser.photoURL,
+                    message: $this.val(),
+                    time: (new Date()).getTime()
+                });
+                $this.val("");
+            }
+        });
+
+        newPostRef.on("child_added", (data) => {
+            const v = data.val();
+            console.log(v);
+            // const k = data.key;
+            let message = "";
+            let d = new Date();
+            if (v.time) {
+                d.setTime(v.time);
+                v.time = ("0" + d.getHours()).substr(-2) + ":" + ("0" + d.getMinutes()).substr(-2);
+            }
+            if (currentUser.uid === v.uid) {
+                message = createRightMessage(v);
+            } else {
+                message = createLeftMessage(v);
+            }
+
+            const $board = $("#board");
+
+            $board.append(message);
+            $board.scrollTop(999999999);
+
+        });
+    };
+
+
+
+    const createLeftMessage = (data) => {
         return `
             <div class="row">
                 <div class="row-wrapper">
-                    <img src="images/icon01.png" class="left-image"/>
-                    <p class="name">${username}</p>
+                    <img src="${data.photoURL}" class="left-image"/>
+                    <p class="name">${data.displayName}</p>
                     <div class="left-message">
-                        ${message}
+                        ${data.message}
                     </div>
-                    <div class="left-time time">${time}</div>
+                    <div class="left-time time">${data.time}</div>
                 </div>
             </div>
         `;
     };
 
-    const createRightMessage = (username, message, time) => {
+    const createRightMessage = (data) => {
         return `
             <div class="row">
                 <div class="row-wrapper">
                     <div class="right-message">
-                        ${message}
+                        ${data.message}
                     </div>
-                    <div class="right-time time">${time}</div>
+                    <div class="right-time time">${data.time}</div>
                 </div>
             </div>
         `;

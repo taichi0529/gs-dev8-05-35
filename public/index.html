@@ -8,15 +8,28 @@
 
 </head>
 <body>
-<div id="title"></div>
-<div id="board">
-</div>
-<div id="input">
-    <input type="text" id="username" placeholder="名前">
-    <input type="text" id="text" placeholder="メッセージを入力">
-</div>
-<div id="login">
+<section class="login" style="display: none">
+    <h2 class="login__title">ラインもどきチャットアプリ</h2>
+    <button class="login__button-facebook">facebookでログイン</button>
+</section>
+<section class="chat" style="display: none">
+    <div id="title">
+        <div class="profile">
+            <img class="profile__photo" src="">
+            <div class="profile__displayName"></div>
+            <ul class="profile__index">
+                <li>
+                    <a href="#" class="profile__logout">ログアウト</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div id="board">
+    </div>
+    <div id="input">
+        <input type="text" id="message" placeholder="メッセージを入力">
+    </div>
+</section>
 
-</div>
 </body>
 </html>

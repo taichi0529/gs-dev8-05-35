@@ -14,6 +14,15 @@ body {
     background-color: #6f92c0;
 }
 
+.chat{
+    display:none;
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    top:0;
+    left: 0;
+}
+
 #title{
      background-color: rgb(39, 49, 69);
      height: 62px;
@@ -185,29 +194,89 @@ p.name02 {
     transform: rotate(20deg);
 }
 
-#username, #text {
+#message {
     /*border: 1px solid black;*/
     border:0;
     font-size: 20px;
-    height: 50px;
+    height: 54px;
     outline: 0;
     margin-top: 5px;
     margin-left: 5px;
+    width:98%;
 }
 
-#username{
-    width:15%;
-}
-#text{
-    width:80%;
+
+
+
+.profile{
+    display: flex;
+    flex-direction: row-reverse;
+    margin:7px;
 }
 
-#login{
-    height: 300px;
-    width: 300px;
+.profile__photo {
+    width: 48px;
+    height: 48px;
+    border-radius: 24px;
+}
+.profile__displayName{
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+    height:48px;
+}
+
+.profile__index{
+    display: none;
+    position: absolute;
+    top:73px;
+    right:3px;
+    background-color: rgb(39, 49, 69);
+    padding:5px;
+    /*box-shadow:2px 2px 4px -1px #dacbd0;*/
+}
+.profile__index:before{
+    content: "";
+    position: absolute;
+    top: -24px;
+    right: 16px;
+    margin-left: -15px;
+    border: 12px solid transparent;
+    border-bottom: 12px solid rgb(39, 49, 69);
+    z-index: 2;
+}
+
+.profile__logout{
+    color: white;
+}
+
+/*ログインページ*/
+
+.login{
+    height: 100%;
+    width: 100%;
     background-color: #fff;
     position: absolute;
     top:0;
     left: 0;
     z-index:2000;
+    display: none;
+}
+
+.login__button-facebook{
+    background-color: #3b5998;
+    width: 280px;
+    height: 50px;
+    border-radius: 5px;
+    color: white;
+    margin: 40px auto;
+    display: block;
+    cursor: pointer;
+}
+
+.login__title{
+    margin-top:80px;
+    text-align: center;
 }
